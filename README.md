@@ -156,6 +156,180 @@ This is compiled to:
 (10,"x",true): *:[Int,*:[String,*:[Boolean,EmptyTuple]]]
 ```
 
+
+## Implicit Conversion
+```scala
+import java.time.LocalDate
+  implicit def stringToLocalDate(s: String): LocalDate = LocalDate.parse(s)
+
+  "2018-09-01".getDayOfWeek // implicit conversion
+
+  class IntOps(val i: Int) extends AnyVal {
+    def square = i * i
+  }
+  implicit def intToIntOps(i: Int): IntOps = new IntOps(i)
+
+  5.square
+//The 5 gets implicitly converted to IntOps, which provides the square method.
+
+implicit class IntOps2(val i: Int) extends AnyVal {  def square: Int = i * i}
+```
+The instances package contains the implementations of the type classes for basic data types that are present in the language core and the ones defined by the Cats library.
+
+```scala
+final class MonadOps[F[_], A](private val fa: F[A]) extends AnyVal {
+  def whileM[G[_]](p: F[Boolean])(implicit M: Monad[F], G: Alternative[G]): F[G[A]] = M.whileM(p)(fa)
+  def whileM_(p: F[Boolean])(implicit M: Monad[F]): F[Unit] = M.whileM_(p)(fa)
+  def untilM[G[_]](p: F[Boolean])(implicit M: Monad[F], G: Alternative[G]): F[G[A]] = M.untilM(fa)(p)
+  def untilM_(p: F[Boolean])(implicit M: Monad[F]): F[Unit] = M.untilM_(fa)(p)
+  def iterateWhile(p: A => Boolean)(implicit M: Monad[F]): F[A] = M.iterateWhile(fa)(p)
+  def iterateUntil(p: A => Boolean)(implicit M: Monad[F]): F[A] = M.iterateUntil(fa)(p)
+}
+trait MonadSyntax {
+  implicit final def catsSyntaxMonad[F[_], A](fa: F[A]): MonadOps[F, A] = new MonadOps(fa)
+}
+```
 `erasedValue[T]`  and `constValue[]`
+
+
+
+In Scala, any operator ending with `:` (a colon) is right associative. Right associative means evaluate expressions from right to left, and left associative means evaluate expressions from left to right.
+Methods that end with the “:” character are invoked by passing left operand to the one in right
+```scala
+val myList = 1 :: 2 :: 3 :: Nil
+```
+
+
+Mirror type class instances provide information at the type level about the components and labelling of the type. They also provide minimal term level infrastructure to allow higher level libraries to provide comprehensive derivation support.
+`Product types` (i.e. case classes and objects, and enum cases) have mirrors which are subtypes of `Mirror.Product. Sum` types (i.e. sealed class or traits with product children, and enums) have mirrors which are subtypes of `Mirror.Sum`.
+
+A trait or class can appear in a `derives` clause if its companion object defines a method named `derived`. The signature and implementation of a `derived` method for a type class `TC[_]` are arbitrary but it is typically of the following form
+
+```scala
+def derived[T](using Mirror.Of[T]): TC[T] = ...
+```
+
+The `derived` method takes a context parameter of (some subtype of) type `Mirror` which defines the shape of the deriving type `T`, and computes the type class implementation according to that shape. This is all that the provider of an ADT with a `derives` clause has to know about the derivation of a type class instance.
+
+`circe` is a type class derivation library, allowing users to derive type classes for their data types. It does this in two ways, automatic and semiautomatic
+
+A type class with multiple methods is defined as 
+```scala
+trait HasLegs[A]{
+    extension(a:A){
+        def walk():Unit
+        def run():Unit
+    }
+}
+```
+Universal equality or loose equality lets us compare any two variables to each other, even if they’re of different types
+universal equality vs multiversal equality.This may lead to several unintended problems in our programs.
+
+```scala
+case class Square(length: Float)
+case class Circle(radius: Float)
+val square = Square(5)
+val circle = Circle(5)
+
+println(square == circle) // prints false. No compilation errors
+```
+
+The program compiles successfully without any problems, but it starts causing trouble at runtime
+
+in Scala3, we can disable universal equality  by importing `scala.language.strictEquality` or by adding `language.strictEquality` as a compiler flag
+
+multiversal equality to address the problems caused by universal equality.
+multiversal equality uses the binary type class `CanEqual` to indicate that values of two given types can be compared with each other
+
+
+`erasedValue,summonInline and ConstValue`
+
+The `inline` keyword is an instruction for the compiler to copy the code from the definition site and to compile it at the caller site
+
+To handle non-literal types, the `erasedValue` method in the same package often comes in handy. It’s undoubtedly one of the most dazzling tools that helps unleash the power of literal types.
+
+Inlining offers many advantages, one of which is to help the compiler resolve a type parameter to a concrete type provided by the caller. The inlined method can then pass the resolved T to `erasedValue[T]`
+
+
+There are two ways to summon values in `inline` methods, the first is with a using parameter and the second is with one of `summonInline`, `summonAll` or `summonFrom`. `using` will summon the value at call site before inlining as if the method was not inline. On the other hand, `summonInline` will summon after inlining if the call is not eliminated form a dead branch. `SummonAll` provides a way to summon multiple values at the same time from a tuple type. `summonFrom` provides a way to try several implicit searches.
+
+summonInline: enables us to summon typeclass instances at a whim for any abstract parameter without specifying it in the method definition, it delays the evaluation of summoning until the call is fully inlined,
+
+```scala
+def tired[A](using Ordering[A]): Ordering[A] =
+  summon[Ordering[A]]
+
+inline def wired[A]: Ordering[A] =
+  summonInline[Ordering[A]]
+```
+
+erasedValue: this one is especially handy when dealing with Tuples of literal types, which allows us to pretty much treat them as compile time collections. What’s weird about this method is it forces us to pattern match on its types instead of values, 
+
+
+
+`HList` is a combination of characteristics of both lists and tuples:
+
+Tuples are fixed lengths of elements of distinct types at compile time. Once we fix the arity of tuples, we will be stuck with them. On the other hand, each element of a tuple can be of different types but after definition, we can’t extend the arity of a tuple.
+Lists are variable-length sequences of elements all of the same type.
+`HList` has combined features of tuples and lists. It captures the sequence of distinct types from tuples and captures the variable-length sequence of elements from lists. So, HList is a variable-length sequence of elements of distinct types:
+
+
+Scala allows types to be expressed using infix notation when they consist of two type parameters.
+Instead of writing `A[B]`, you can write `A B`, which is especially common when dealing with type constructors like `List[Int]` can be written as `List Int`.
+Right-Associative Type Alias:
+
+The :: symbol is right-associative when used in type declarations.
+This means that A :: B :: C is interpreted as A :: (B :: C), making it convenient for constructing type-level lists or sequences.
+Combining these features, the type H :: HList is interpreted as ::[H, HList]. The :: case class or trait is often defined with two type parameters, allowing it to be used in this infix notation for constructing type-level lists or HLists.
+
+Methods ending in ‘:’ are right-associative, while others are left-associative.
+
+```scala
+sealed trait HList extends Product with Serializable{
+    def prepend[H](h : H): ::[H,HList]= new ::(h, this)
+    def ::[H](h : H): H::HList= new ::(h, this)
+  }
+
+  final case class ::[+H, +T <: HList](head : H, tail : T) extends HList{
+
+  }
+
+  sealed trait HNil extends HList {
+    
+  }
+
+  case object HNil extends HNil
+
+  val h=5::HNil
+```
+
+
+`Singleton` is used by the compiler as a supertype for singleton types. This includes literal types, as they are also singleton types.
+
+A singleton type is a type inhabited by exactly one value
+Scala 2.13 introduced a special kind of singleton type—the literal type. It denotes a single value of some literal and represents the most precise type of this literal
+`constValue`  allows you to extract the value of a constant at compile-time; the ability to obtain the value of a constant, such as a literal or an enum case, during the compilation process rather than at runtime
+
+`refined` uses singleton types
+Refined types allow you to define more specific types by applying predicates to existing types
+```scala
+import scala.compiletime.ops.int._
+```
+
+A `Refined p x` wraps a value of type `x`, ensuring that it satisfies a type-level predicate `p`.
+`slice :: Refined Positive Int -> [a] -> [[a]]`
+
+In Scala we have it as
+`Int Refined Positive` or `val aPositiveInteger: Refined[Int, Positive] = 42`
+Refined is a type that takes two type arguments: the “value” type you’re testing/validating, and the predicate you want the value to pass
+```scala
+val aNegative: Int Refined Negative = -100
+val nonNegative: Int Refined NonNegative = 0
+val anOdd: Int Refined Odd = 3
+val anEven: Int Refined Even = 68
+```
+Notice I used Refined in infix notation: Refined[Int, Odd] can also be written as Int Refined Odd
 [type class derivation](https://medium.com/riskified-technology/type-class-derivation-in-scala-3-ba3c7c41d3ef)
 [Scala3](http://www.limansky.me/posts/2021-07-26-from-scala-2-shapeless-to-scala-3.html)
+
+[metaprogramming](https://scalac.io/blog/inline-your-boilerplate-harnessing-scala3-metaprogramming-without-macros/)
