@@ -1,3 +1,5 @@
+import scala.deriving.Mirror
+import scala.compiletime._
 object TypeLambdas {
   trait Monad[F[_]] {
     def pure[A](a: A): F[A]
@@ -43,4 +45,23 @@ object TypeLambdas {
     ): Either[E, B] = ???
     override def pure[A](a: A): Either[E, A] = ???
   }
+
+  sealed trait HList extends Product with Serializable {
+    def prepend[H](h: H): ::[H, HList] = new ::(h, this)
+    def ::[H](h: H): H :: HList = new ::(h, this)
+  }
+
+  final case class ::[+H, +T <: HList](head: H, tail: T) extends HList {}
+
+  sealed trait HNil extends HList {}
+
+  case object HNil extends HNil
+
+  val h = 5 :: HNil
+
+  val p = HNil.prepend(6)
+
+  case class Student[A](name: String, a: A)
+  val st: Student[Int] = Student("paul", 23)
+
 }

@@ -35,21 +35,6 @@ object Others {
   Tuples.from[Vehicle](("Simson", 2))
 // Vehicle("Simson", 2)
 
-  enum Tree[T] derives Show {
-    case Branch(left: Tree[T], right: Tree[T])
-    case Leaf(elem: T)
-  }
-  trait Show[A] {
-    def show(a: A): String
-  }
-  object Show {
-    inline def derived[T](using m: Mirror.Of[T]): Show[T] =
-      inline m match {
-        case s: Mirror.SumOf[T]     => ???
-        case p: Mirror.ProductOf[T] => ???
-      }
-  }
-
   trait Eq[T] {
     def eqv(x: T, y: T): Boolean
   }
@@ -66,7 +51,7 @@ object Others {
         }
       }
     def check(x: Any, y: Any, elem: Eq[?]): Boolean =
-        elem.asInstanceOf[Eq[Any]].eqv(x, y)
+      elem.asInstanceOf[Eq[Any]].eqv(x, y)
     def iterable[T](p: T): Iterable[Any] = new AbstractIterable[Any] {
       def iterator: Iterator[Any] = p.asInstanceOf[Product].productIterator
 
