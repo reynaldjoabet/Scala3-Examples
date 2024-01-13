@@ -88,3 +88,41 @@ val intArray: Array[Int] = Array(1, 2, 3)
 val encodedIntArray: JsonValue =
   summon[JsonEncoder[Array[Int]]].encode(intArray)
 println(encodedIntArray)
+
+transparent inline def sum(a: Int, b: Int) = a + b
+val total: 30 = sum(10, 20) // The type is Literal Value 30 instead of Int
+
+object Foo {
+  val x: 3 = 3
+
+}
+summon[Foo.x.type =:= 3]
+
+// Singletons are used to model equality between terms
+
+def same(a: Any, b: a.type) = 9
+
+same(3, 3)
+
+//same(3,4)// not okay
+
+// writing the same function with a type parameter isntead has a different meaning. It asks the compiler to find a T such that 3<:T and 4 <:T which is satisfied for T=Int
+
+def same1[T](a: T, b: T) = 9
+same1(3, 4) //okay as T is inferred as Int
+
+//identity using dependent type
+def dependedMethod(a: Any): a.type = a
+val mn: 3 = dependedMethod(3)
+
+def guard(scope: String, a: scope.type) = 0
+"challenges:read"
+
+def middleware(permission: String, scope: permission.type) = 8
+
+middleware("read", "read")
+guard("hello", "hello")
+
+Set(1, 2, 3, 1, 2, 3).subsetOf(Set(1, 2, 3, 8))
+
+Set(1, 2, 3, 1, 2, 3)

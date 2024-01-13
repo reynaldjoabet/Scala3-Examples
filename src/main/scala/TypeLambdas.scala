@@ -64,4 +64,8 @@ object TypeLambdas {
   case class Student[A](name: String, a: A)
   val st: Student[Int] = Student("paul", 23)
 
+  transparent inline def sum(a: Int, b: Int) = a + b
+  val total: 30 = sum(10, 20) // The type is Literal Value 30 instead of Int
+
+  // Shapeless makes it convenient to convert specific types into generic ones that we can manipulate with common code
 }

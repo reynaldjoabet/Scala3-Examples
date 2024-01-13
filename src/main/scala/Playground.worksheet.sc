@@ -272,7 +272,7 @@ object Show {
     new Show[Array[A]] {
       def show(value: Array[A]): String =
         s"List(${value.map(elemShow.show).mkString(",")})"
-        //s"List(${})"
+        // s"List(${})"
     }
 
   inline given derivedLinearSeq[A](using
@@ -286,10 +286,13 @@ object Show {
   inline given derivedOption[A](using elemShow: Show[A]): Show[Option[A]] =
     new Show[Option[A]] {
       def show(value: Option[A]): String =
-        if(value.isDefined) s"Some(${value.map(elemShow.show).mkString(",")})" else None.toString()
+        if (value.isDefined) s"Some(${value.map(elemShow.show).mkString(",")})"
+        else None.toString()
     }
 
-  inline given derivedSortedSet[A](using elemShow: Show[A]): Show[SortedSet[A]] =
+  inline given derivedSortedSet[A](using
+      elemShow: Show[A]
+  ): Show[SortedSet[A]] =
     new Show[SortedSet[A]] {
       def show(value: SortedSet[A]): String =
         s"List(${value.map(elemShow.show).mkString(",")})"
@@ -316,7 +319,7 @@ object Show {
 
   inline given derivedList[A](using elemShow: Show[A]): Show[List[A]] =
     new Show[List[A]] {
-      def show(value: List[A]): String = 
+      def show(value: List[A]): String =
         s"List(${value.map(elemShow.show).mkString(",")})"
     }
   inline given derivedVector[A](using elemShow: Show[A]): Show[Vector[A]] =
@@ -329,7 +332,6 @@ object Show {
         def show(value: ListSet[A]): String =
           value.map(elemShow.show).mkString(",")
       }
-
 
   val n = valueOf[12]
 }
@@ -352,7 +354,7 @@ summon[Show[List[PrintedBook]]].show(List(p1, p2))
 
 summon[Show[Set[PrintedBook]]].show(Set(p1, p2))
 
-summon[Show[SortedSet[Int]]].show(SortedSet(1,2,3,4))
+summon[Show[SortedSet[Int]]].show(SortedSet(1, 2, 3, 4))
 
 summon[Show[Option[Int]]].show(Some(23))
 summon[Show[Option[Int]]].show(None)

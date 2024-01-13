@@ -301,13 +301,16 @@ sealed trait HList extends Product with Serializable{
   case object HNil extends HNil
 
   val h=5::HNil
+val hlist = 1 :: 1.0 :: "One" :: false ::‌ HNil
 ```
-
+HList is a recursive data structure. Each HList is either an empty list (HNil) or a pair of H and T types, in which H (head) is an arbitrary type and T (tail) is another HList. In Scala, we can write any pair type like ::[H, T] in a more ergonomic way like H :: T, so the type of our hlist is either Int :: Double :: String :: Boolean :: HNill or ::[Int, ::[Double, ::[String, ::[Boolean, HNill]]]].
 
 `Singleton` is used by the compiler as a supertype for singleton types. This includes literal types, as they are also singleton types.
 
 A singleton type is a type inhabited by exactly one value
 Scala 2.13 introduced a special kind of singleton type—the literal type. It denotes a single value of some literal and represents the most precise type of this literal
+
+`object Foo{}` The type `Foo.type` is the type of `Foo`, and Foo is the only value with that type.
 `constValue`  allows you to extract the value of a constant at compile-time; the ability to obtain the value of a constant, such as a literal or an enum case, during the compilation process rather than at runtime
 
 `refined` uses singleton types
@@ -329,7 +332,173 @@ val anOdd: Int Refined Odd = 3
 val anEven: Int Refined Even = 68
 ```
 Notice I used Refined in infix notation: Refined[Int, Odd] can also be written as Int Refined Odd
+
+We can instruct the compiler to use the most specialized type available, by using the keyword `transparent`:
+
+inline val instructs the compiler that the value is a compile-time constant and that the variable can be replaced with the actual value at compile time
+
+inline def moves the code from definition-site to call-site.
+
+instances of `=:=` type are generated automatically by the compiler when the left-hand side and the right-hand side are both subtypes of each other
+`summon[X=:=Y]` compiles only if X are equivalent Y
+```scala
+object Foo{
+    val x:3=3
+
+}
+summon[Foo.x.type =:=3]
+```
+Match types are well suited when we want to implement methods whose implementation depends on the type(s) of its parameters. Such methods are called dependent methods
+
+parametric polymorphism is when the behavior of your program does not change depending on the shape of your types
+
+```scala
+List("Paul","John").size
+List(1,2,3).size
+```
+In adhoc polymorphism, the behavior of your program changes depending on the shape of your types
+In OOP, this achieved via subtyping
+Functional progamming languages like Haskell do not have subtyping but they still need adhoc polymorphism,so they use type classes 
+
+
+A match type reduces to one of its right-hand sides, depending on the type of its scrutinee
+```scala
+type Elem[X] = X match
+  case String => Char
+  case Array[t] => t
+  case Iterable[t] => t
+
+```
+
+Sahpeless was used for type class derivation and arity and data polymorphsim
+
+
+You can think of type constructors as regular constructors that operate at the type level. Instead of taking other values as arguments and yielding new values in return, type constructors take types and yield types
+
+## Free Monad
+Free as in free to be interpreted in any way. free is used in the sense of unrestricted rather than zero cost
+All of the doobie monads are implemented via Free and have no operational semantics; we can only “run” a doobie program by transforming FooIO (for some carrier type java.sql.Foo) to a monad that actually has some meaning.
+
+Out of the box doobie provides an interpreter from its free monads to Kleisli[M, Foo, ?] given Async[M]
+
+```scala
+val interpreter = KleisliInterpreter[IO](LogHandler.noop).ConnectionInterpreter
+// interpreter: ConnectionOp ~> [γ$9$]Kleisli[IO, Connection, γ$9$] = doobie.free.KleisliInterpreter$$anon$10@19a97a54
+val kleisli = program1.foldMap(interpreter)
+```
+
+So the interpreter above is used to transform a ConnectionIO[A] program into a Kleisli[IO, Connection, A]. Then we construct an IO[Connection] (returning null) and bind it through the Kleisli, yielding our IO[Int]. This of course only works because program1 is a pure value that does not look at the connection.
+
+The Transactor that we defined at the beginning of this chapter is basically a utility that allows us to do the same as above using program1.transact(xa).
+
+There is a bit more going on when calling transact (we add commit/rollback handling and ensure that the connection is closed in all cases) but fundamentally it’s just a natural transformation and a bind.
+
+```scala
+ // Free monad over ConnectionOp.
+  type ConnectionIO[A] = FF[ConnectionOp, A]
+```
+Algebra and free monad for primitive operations over a java.sql.Connection. This is a low-level API that exposes lifecycle-managed JDBC objects directly and is intended mainly for library developers. End users will prefer a safer, higher-level API such as that provided in the doobie.hi package.
+
+ConnectionIO is a free monad that must be run via an interpreter, most commonly via natural transformation of its underlying algebra ConnectionOp to another monad via Free#foldMap.
+
+The library provides a natural transformation to Kleisli[M, Connection, A] for any exception-trapping (Catchable) and effect-capturing (Capture) monad M. Such evidence is provided for Task, IO, and stdlib Future; and transK[M] is provided as syntax.
+
+
+For functors, the higher-kinded version of Function1 is called a natural transformation. The structure looks something like this:
+
+```scala
+trait FunctorNatTrans[F[_], G[_]] {
+    def apply[A](fa: F[A]): G[A]
+}
+```
+
+Examples of natural transformations can be found throughout the Scala standard library, if you know how to look for them. The .headOption method on lists is a good example of a natural transformation from lists to options:
+
+```scala
+object ListToOptionTrans extends FunctorNatTrans[List, Option] {
+    override def apply[A](fa: List[A]) = fa.headOption
+}
+```
+
+Doobie is a free monad
+
+```scala
+
+ FunctionK[F[_], G[_]] is a functor transformation from `F` to `G`
+in the same manner that function `A => B` is a morphism from values
+ of type `A` to `B`. An easy way to create a FunctionK instance is to use the Polymorphic lambdas provided by typelevel/kind-projector v0.9+. E.g.
+  {{{
+    val listToOption = λ[FunctionK[List, Option]](_.headOption)
+  }}}
+ 
+trait FunctionK[F[_], G[_]] extends Serializable { self =>
+
+  /**
+   * Applies this functor transformation from `F` to `G`
+   */
+  def apply[A](fa: F[A]): G[A]
+
+}
+//Catamorphism for `Free`
+ final def foldMap[M[_]](f: FunctionK[S, M])(implicit M: Monad[M]): M[A] =
+    M.tailRecM(this)(_.step match {
+      case Pure(a)          => M.pure(Right(a))
+      case Suspend(sa)      => M.map(f(sa))(Right(_))
+      case FlatMapped(c, g) => M.map(c.foldMap(f))(cc => Left(g(cc)))
+    })
+
+```
+
+A free monad is a construction which allows you to build a monad from any Functor. Like other monads, it is a pure way to represent and manipulate computations.
+In particular, free monads provide a practical way to:
+- represent stateful computations as data, and run them
+- run recursive computations in a stack-safe way
+- build an embedded DSL (domain-specific language)
+- retarget a computation to another interpreter using natural transformations
+
+ free monads are basically a way to easily get a generic pure Monad instance for any Functo
+
+
+The concept of “natural transformation” is a higher-kinded Function1 type that looks like this:
+```scala
+ trait ~>[F[_], G[_]] {
+    def apply[A](fa: F[A]): G[A]
+  }
+```
+So instead of a regular Function1 taking value types as type parameters, now we operate at a higher kind
+Examples of natural transformations in real life include:
+
+`Try[A].toOption`: this is an example of an implementation of a natural transformation between Try and Option
+`List[A].headOption` which returns the head of the list, if it exists: an example of an implementation of a natural transformation between List and Option
+`Option[A].toList`: the reverse
+
+
+The Free monad is a pattern which allows us to separate
+
+- the description of fundamental operations
+- the business logic of our application
+- the evaluation of that business logic
+ 
+This makes it very easy to maintain, because we can work independently on either
+
+- the business logic, while keeping interpreters fixed
+- the interpreters, while keeping the business logic fixed
+- the fundamental operations and the interpreter(s), while keeping the business logic fixed
+So notice the flexibility we get by choosing to work on a piece of the system without affecting the others. Another benefit of this approach is testability, because we can always supply a “testing” monad to evaluate the program, make assertions and ensure the business logic is correct, while the interpreter itself can be independently tested.
+##  type class compose
+
 [type class derivation](https://medium.com/riskified-technology/type-class-derivation-in-scala-3-ba3c7c41d3ef)
 [Scala3](http://www.limansky.me/posts/2021-07-26-from-scala-2-shapeless-to-scala-3.html)
 
 [metaprogramming](https://scalac.io/blog/inline-your-boilerplate-harnessing-scala3-metaprogramming-without-macros/)
+
+[literal types](https://medium.com/@hao.qin/scala-3-enlightenment-unleash-the-power-of-literal-types-41e3436b4df8#:~:text=Literal%20types%20are%20compilation%2Dtime,available%20to%20any%20Scala%20programmer.)
+
+[inline](https://scalac.io/blog/inline-your-boilerplate-harnessing-scala3-metaprogramming-without-macros/)
+
+[inline](https://www.baeldung.com/scala/inline-modifier)
+[generic-type-class-derivation](https://blog.1punch.dev/scala/dotty/en/generic-type-class-derivation)
+
+[automatic-type-class-derivation](https://medium.com/@mattroberts297/automatic-type-class-derivation-with-shapeless-part-three-357709122e8b)
+
+[shapeless-guide](https://books.underscore.io/shapeless-guide/shapeless-guide.html)
