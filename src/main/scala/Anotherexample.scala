@@ -18,18 +18,23 @@ object Anotherexample extends App {
   // println(hosts.getCanonicalHostName())
   // println(host.getHostAddress())
 
-  println(host.getHostName())
-  println(host.getCanonicalHostName())
+  // println(host.getHostName())
+  // println(host.getCanonicalHostName())
 
-  println(host2.getHostAddress())
+  // println(host2.getHostAddress())
 
-  println(h.getHostAddress())
-  println(h.getHostName())
-  println(h.getCanonicalHostName())
-  println(host2.getHostName())
-  println(host2.getCanonicalHostName())
+  // println(h.getHostAddress())
+  // println(h.getHostName())
+  // println(h.getCanonicalHostName())
+  // println(host2.getHostName())
+  // println(host2.getCanonicalHostName())
 
-  hosts2.foreach(x => println(x.getCanonicalHostName()))
+  //hosts2.foreach(x => println(x.getCanonicalHostName()))
   val d: List[Int] = List(3)
   println(hosts2.length)
+ 
+  println(hosts2.head.getHostName())
+  println(h.getHostName())
+  println(hosts2.head.getCanonicalHostName())
+  println(h.getCanonicalHostName())
 }

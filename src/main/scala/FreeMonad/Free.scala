@@ -19,6 +19,7 @@ trait Free[M[_], A] {
 object Free {
 
   def pure[F[_], A](a: A): Free[F, A] = Pure(a)
+  def liftF[F[_],A](fa:F[A]): Free[F, A]= Suspend(fa)
 
   case class Pure[M[_], A](a: A) extends Free[M, A]
   case class FlatMap[M[_], A, B](fa: Free[M, A], f: A => Free[M, B])
