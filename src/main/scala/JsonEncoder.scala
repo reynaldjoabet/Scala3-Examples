@@ -24,7 +24,7 @@ object JsonEncoder {
     new JsonEncoder[A] {
       def encode(a: A): String = {
         val fieldNames = elemLabels[m.MirroredElemLabels]
-        val values =
+        val values     =
           a.asInstanceOf[Product].productIterator.toList
 
         val fields = (fieldNames zip values).map { case (fieldName, value) =>

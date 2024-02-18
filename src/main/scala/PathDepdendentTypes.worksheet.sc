@@ -46,9 +46,9 @@ val flt506Seat21A = new flt506.Seat(21, 'A')
 
 val flt506Seat20F = new flt506.Seat(20, 'F')
 
-flt506.seatPassenger(nash, flt506Seat20F) // good
+flt506.seatPassenger(nash, flt506Seat20F)    // good
 flt506.seatPassenger(mcadams, flt506Seat21A) //good
-flt102.seatPassenger(kelland, flt102Seat1A) //good
+flt102.seatPassenger(kelland, flt102Seat1A)  //good
 
 //flt102.seatPassenger(kelland,flt506Seat20F)// not good
 
@@ -60,10 +60,10 @@ object AwesomeDB {
   }
 }
 import AwesomeDB.Key
-class AwesomeDB {
+class AwesomeDB  {
   import collection.mutable.Map
-  val data = Map.empty[Key, Any]
-  def get(key: Key): Option[key.Value] =
+  val data                                  = Map.empty[Key, Any]
+  def get(key: Key): Option[key.Value]      =
     data.get(key).asInstanceOf[Option[key.Value]]
   def set(key: Key)(value: key.Value): Unit = data.update(key, value)
 }
@@ -72,7 +72,7 @@ class AwesomeDB {
 
 //We can now define some concrete keys that we want to use:
 
-trait IntValued extends Key {
+trait IntValued    extends Key {
   type Value = Int
 }
 trait StringValued extends Key {
@@ -83,7 +83,7 @@ object Keys {
   val bar = new Key("bar") with StringValued
 }
 
-val dataStore = new AwesomeDB
+val dataStore      = new AwesomeDB
 dataStore.set(Keys.foo)(23)
 val i: Option[Int] = dataStore.get(Keys.foo)
 //dataStore.set(Keys.foo)("23") // does not compile

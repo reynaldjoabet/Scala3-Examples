@@ -9,7 +9,7 @@ object Others {
   // @main
   def mainApp =
     "".sayHi
-  val k = 2 :: 3 :: Nil
+  val k       = 2 :: 3 :: Nil
 
   val g = Nil.::(3)
   val f = List(3)
@@ -43,16 +43,16 @@ object Others {
 
     import scala.deriving.Mirror
 
-    def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[?]]): Eq[T] =
+    def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[?]]): Eq[T]         =
       new Eq[T] {
         def eqv(x: T, y: T): Boolean = {
           val ordx = s.ordinal(x) // (3)
           (s.ordinal(y) == ordx) && check(x, y, elems(ordx)) // (4)
         }
       }
-    def check(x: Any, y: Any, elem: Eq[?]): Boolean =
+    def check(x: Any, y: Any, elem: Eq[?]): Boolean                        =
       elem.asInstanceOf[Eq[Any]].eqv(x, y)
-    def iterable[T](p: T): Iterable[Any] = new AbstractIterable[Any] {
+    def iterable[T](p: T): Iterable[Any]                                   = new AbstractIterable[Any] {
       def iterator: Iterator[Any] = p.asInstanceOf[Product].productIterator
 
     }
@@ -66,17 +66,17 @@ object Others {
       inline erasedValue[Elems] match {
         case _: (elem *: elems) =>
           deriveOrSummon[T, elem] :: summonInstances[T, elems]
-        case _: EmptyTuple => Nil
+        case _: EmptyTuple      => Nil
       }
-    inline def deriveOrSummon[T, Elem]: Eq[Elem] =
+    inline def deriveOrSummon[T, Elem]: Eq[Elem]               =
       inline erasedValue[Elem] match {
         case _: T => deriveRec[T, Elem]
         case _    => summonInline[Eq[Elem]]
       }
-    inline def deriveRec[T, Elem]: Eq[Elem] =
+    inline def deriveRec[T, Elem]: Eq[Elem]                    =
       inline erasedValue[T] match {
         case _: Elem => error("infinite recursive derivation")
-        case _ =>
+        case _       =>
           Eq.derived[Elem](using
             summonInline[Mirror.Of[Elem]]
           ) // recursive derivation

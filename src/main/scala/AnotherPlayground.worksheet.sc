@@ -38,8 +38,8 @@ object JsonEncoder {
     new JsonEncoder[A] {
       def encode(a: A): JsonValue = {
         val fieldNames = elemLabels[ev.MirroredElemLabels]
-        val values = a.asInstanceOf[Product].productIterator.toList
-        val fields =
+        val values     = a.asInstanceOf[Product].productIterator.toList
+        val fields     =
           elemInstances.zip(values).map { case (elemEncoder, elemValue) =>
             elemEncoder.asInstanceOf[JsonEncoder[Any]].encode(elemValue)
           }
@@ -48,7 +48,7 @@ object JsonEncoder {
     }
   }
 
-  inline def elemLabels[T <: Tuple]: List[String] =
+  inline def elemLabels[T <: Tuple]: List[String]        =
     inline erasedValue[T] match {
       case _: EmptyTuple => Nil
       case _: (t *: ts)  => constValue[t].asInstanceOf[String] :: elemLabels[ts]
@@ -65,7 +65,7 @@ case class Person(name: String, age: Int)
 val person = Person("Alice", 30)
 
 // Summon the derived instance and use it to encode the case class
-val personJsonEncoder = summon[JsonEncoder[Person]]
+val personJsonEncoder    = summon[JsonEncoder[Person]]
 val jsonValue: JsonValue = personJsonEncoder.encode(person)
 
 println(jsonValue)
@@ -84,13 +84,13 @@ valueOf[23]
 valueOf[Hello.type]
 
 // Example usage
-val intArray: Array[Int] = Array(1, 2, 3)
+val intArray: Array[Int]       = Array(1, 2, 3)
 val encodedIntArray: JsonValue =
   summon[JsonEncoder[Array[Int]]].encode(intArray)
 println(encodedIntArray)
 
 transparent inline def sum(a: Int, b: Int) = a + b
-val total: 30 = sum(10, 20) // The type is Literal Value 30 instead of Int
+val total: 30                              = sum(10, 20) // The type is Literal Value 30 instead of Int
 
 object Foo {
   val x: 3 = 3
@@ -113,7 +113,7 @@ same1(3, 4) //okay as T is inferred as Int
 
 //identity using dependent type
 def dependedMethod(a: Any): a.type = a
-val mn: 3 = dependedMethod(3)
+val mn: 3                          = dependedMethod(3)
 
 def guard(scope: String, a: scope.type) = 0
 "challenges:read"

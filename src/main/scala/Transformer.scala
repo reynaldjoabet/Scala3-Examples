@@ -9,7 +9,7 @@ object Transformer {
   def apply[A, B](using transformer: Transformer[A, B]): Transformer[A, B] =
     transformer
 
-  given [A]: Transformer[A, A] =
+  given [A]: Transformer[A, A]                                        =
     new {
       def transform(from: A): A = from
     }
@@ -52,7 +52,7 @@ object Transformer {
   sealed trait Field[Label <: String, Type]
   type FromLabelsAndTypes[Labels <: Tuple, Types <: Tuple] <: Tuple =
     (Labels, Types) match {
-      case (EmptyTuple, EmptyTuple) => EmptyTuple
+      case (EmptyTuple, EmptyTuple)                       => EmptyTuple
       case (labelHead *: labelTail, typeHead *: typeTail) =>
         Field[labelHead, typeHead] *: FromLabelsAndTypes[labelTail, typeTail]
     }

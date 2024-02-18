@@ -29,10 +29,10 @@ object Anotherexample extends App {
   // println(host2.getHostName())
   // println(host2.getCanonicalHostName())
 
-  //hosts2.foreach(x => println(x.getCanonicalHostName()))
+  // hosts2.foreach(x => println(x.getCanonicalHostName()))
   val d: List[Int] = List(3)
   println(hosts2.length)
- 
+
   println(hosts2.head.getHostName())
   println(h.getHostName())
   println(hosts2.head.getCanonicalHostName())

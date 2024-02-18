@@ -22,9 +22,9 @@ object TypeLambdas {
     ): Kleisli[F, B, C] = ???
     override def pure[A](a: A): Kleisli[F, A, C] = ???
   }
-  class Function1Monad[F] extends Monad[[X] =>> Function1[F, X]] {
+  class Function1Monad[F]     extends Monad[[X] =>> Function1[F, X]]  {
     override def flatMap[A, B](fa: F => A)(f: A => F => B): F => B = ???
-    override def pure[A](a: A): F => A = ???
+    override def pure[A](a: A): F => A                             = ???
   }
 
   class MonadFunction2[X, Y] extends Monad[[C] =>> Function2[Int, Int, C]] {
@@ -33,13 +33,13 @@ object TypeLambdas {
     ): (Int, Int) => B = ???
     override def pure[A](a: A): (Int, Int) => A = ???
   }
-  class OptionTMonad[F[_]] extends Monad[[X] =>> OptionT[F, X]] {
+  class OptionTMonad[F[_]]   extends Monad[[X] =>> OptionT[F, X]]          {
     override def flatMap[A, B](fa: OptionT[F, A])(
         f: A => OptionT[F, B]
     ): OptionT[F, B] = ???
     override def pure[A](a: A): OptionT[F, A] = ???
   }
-  class EitherMonad[E] extends Monad[[X] =>> Either[E, X]] {
+  class EitherMonad[E]       extends Monad[[X] =>> Either[E, X]]           {
     override def flatMap[A, B](fa: Either[E, A])(
         f: A => Either[E, B]
     ): Either[E, B] = ???
@@ -48,7 +48,7 @@ object TypeLambdas {
 
   sealed trait HList extends Product with Serializable {
     def prepend[H](h: H): ::[H, HList] = new ::(h, this)
-    def ::[H](h: H): H :: HList = new ::(h, this)
+    def ::[H](h: H): H :: HList        = new ::(h, this)
   }
 
   final case class ::[+H, +T <: HList](head: H, tail: T) extends HList {}
@@ -65,7 +65,7 @@ object TypeLambdas {
   val st: Student[Int] = Student("paul", 23)
 
   transparent inline def sum(a: Int, b: Int) = a + b
-  val total: 30 = sum(10, 20) // The type is Literal Value 30 instead of Int
+  val total: 30                              = sum(10, 20) // The type is Literal Value 30 instead of Int
 
   // Shapeless makes it convenient to convert specific types into generic ones that we can manipulate with common code
 }

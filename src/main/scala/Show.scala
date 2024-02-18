@@ -4,10 +4,10 @@ enum Tree[T] derives Show, CanEqual {
   case Branch(left: Tree[T], right: Tree[T])
   case Leaf(elem: T)
 }
-trait Show[A] {
+trait Show[A]                       {
   def show(a: A): String
 }
-object Show {
+object Show                         {
 
   inline def derived[T](using m: Mirror.Of[T]): Show[T] =
     new Show[T] {
@@ -24,7 +24,7 @@ object Show {
       def show(value: Array[A]): String =
         value.toList.map(elemShow.show).mkString(",")
     }
-  inline def elemLabels[T <: Tuple]: List[String] =
+  inline def elemLabels[T <: Tuple]: List[String]                       =
     inline erasedValue[T] match {
       case _: EmptyTuple => Nil
       case _: (t *: ts)  => constValue[t].asInstanceOf[String] :: elemLabels[ts]
@@ -42,7 +42,7 @@ object Show {
     // in order to get the value that has that type, we use constValue
     val productName: String =
       constValue[m.MirroredLabel] // something like "Person"
-    val fieldNames = elemLabels[m.MirroredElemLabels]
+    val fieldNames               = elemLabels[m.MirroredElemLabels]
     val instances: List[Show[_]] =
       summonAll[m.MirroredElemTypes] // eg List(Show[Strin],Show[Int])
     val values =
@@ -59,7 +59,7 @@ object Show {
 
   inline def showCase[A, T <: Tuple](n: Int, ord: Int, a: A): String = {
     inline erasedValue[T] match {
-      case EmptyTuple => ""
+      case EmptyTuple   => ""
       case _: (t *: ts) =>
         if (n == ord) {
           summonFrom { case p: Mirror.ProductOf[`t`] =>
@@ -68,7 +68,7 @@ object Show {
         } else showCase[A, ts](n + 1, ord, a)
     }
   }
-  inline def showSum[A](m: Mirror.SumOf[A], a: A): String = {
+  inline def showSum[A](m: Mirror.SumOf[A], a: A): String            = {
     val ord = m.ordinal(a)
     showCase[A, m.MirroredElemTypes](0, ord, a)
   }

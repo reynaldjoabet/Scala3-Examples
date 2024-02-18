@@ -12,13 +12,13 @@ trait RowEncoder[A] {
   def encodeRow(a: A): Row
 }
 object BaseEncoders {
-  given FieldEncoder[Int] with {
+  given FieldEncoder[Int] with     {
     def encodeField(x: Int) = x.toString
   }
   given FieldEncoder[Boolean] with {
     def encodeField(x: Boolean) = if x then "true" else "false"
   }
-  given FieldEncoder[String] with {
+  given FieldEncoder[String] with  {
     def encodeField(x: String) =
       x // Ideally, we should also escape commas and double quotes
   }
@@ -62,5 +62,3 @@ type Elem[X] = X match {
 val n: Elem[Int] = ""
 
 type PolyIdentity = [T] => T => T
-
-

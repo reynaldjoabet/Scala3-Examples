@@ -128,14 +128,14 @@ object SecurityExamples extends App {
 
   val generator = KeyPairGenerator.getInstance("RSA");
   generator.initialize(2048);
-  val keyGen = KeyGenerator.getInstance("Blowfish")
-  val pair = generator.generateKeyPair();
+  val keyGen    = KeyGenerator.getInstance("Blowfish")
+  val pair      = generator.generateKeyPair();
 
   val privateKey: PrivateKey = pair.getPrivate();
-  val publicKey: PublicKey = pair.getPublic();
+  val publicKey: PublicKey   = pair.getPublic();
 
   Try(new FileOutputStream("public.pem")).map(_.write(publicKey.getEncoded()))
-  val publicKeyFile = new File("public.pem");
+  val publicKeyFile  = new File("public.pem");
   val publicKeyBytes = Files.readAllBytes(publicKeyFile.toPath());
   println(privateKey.getEncoded())
   println(privateKey.getFormat())
@@ -149,22 +149,22 @@ object SecurityExamples extends App {
   println(publicKeyBytes)
 
   val keyFactory: KeyFactory = KeyFactory.getInstance("RSA")
-  val keyManagerFactory =
+  val keyManagerFactory      =
     KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
-  val trustManagerFactory =
+  val trustManagerFactory    =
     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-  val publicKeySpec = new X509EncodedKeySpec(publicKeyBytes)
+  val publicKeySpec          = new X509EncodedKeySpec(publicKeyBytes)
   keyFactory.generatePublic(publicKeySpec)
-  val secure = SecureRandom.getInstance("NativePRNG")
+  val secure                 = SecureRandom.getInstance("NativePRNG")
 
-  val secure1 = SecureRandom()
+  val secure1         = SecureRandom()
   // DSAPublicKeySpec
   // DESKeySpec
-  val home = System.getProperty("java.home")
+  val home            = System.getProperty("java.home")
 //println(home)
 //sys.props.foreach(println)
 //sys.getProperties().forEach(c=>println(c))
-  val cipher: Cipher =
+  val cipher: Cipher  =
     Cipher.getInstance("RSA/ECB/OAEPWITHSHA-512ANDMGF1PADDING", "SunJCE")
   val cipher2: Cipher = Cipher.getInstance("Blowfish", "SunJCE")
   val cipher3: Cipher =
@@ -182,7 +182,7 @@ object SecurityExamples extends App {
 //println(cipher.getProvider().getName().toString())
 
   val g = Try(new FileInputStream("fileName-of-cert")).map { inStream =>
-    val cf = CertificateFactory.getInstance("X.509");
+    val cf   = CertificateFactory.getInstance("X.509");
     val cert = cf.generateCertificate(inStream).asInstanceOf[X509Certificate]
     cert.getIssuerX500Principal()
   }
@@ -191,7 +191,7 @@ object SecurityExamples extends App {
   val keystore = KeyStore.getInstance(KeyStore.getDefaultType())
   println(KeyStore.getDefaultType())
   val fileName = home + "/lib/security/cacerts".replace("/", File.separator)
-  val is = new FileInputStream(fileName)
+  val is       = new FileInputStream(fileName)
 
   println(fileName)
   keystore.load(is, "changeit".toCharArray())
@@ -202,7 +202,7 @@ object SecurityExamples extends App {
 
   val keyGenerator = KeyGenerator.getInstance("AES")
   keyGenerator.init(192)
-  val key = keyGen.generateKey()
+  val key          = keyGen.generateKey()
 
   println(key.getAlgorithm())
   println(key.getEncoded())
@@ -211,18 +211,18 @@ object SecurityExamples extends App {
   val li = (1 to 1000).toList
 
 //li.sliding(4,1).foreach(println)
-  val random = new SecureRandom()
-  val ivBytes = new Array[Byte](16)
+  val random   = new SecureRandom()
+  val ivBytes  = new Array[Byte](16)
   random.nextBytes(ivBytes)
-  val iv = new IvParameterSpec(ivBytes);
-  val salt = "passwordsalt".getBytes("UTF-8")
-  val keySpec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
-  val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
-  val bytes = factory.generateSecret(keySpec).getEncoded
+  val iv       = new IvParameterSpec(ivBytes);
+  val salt     = "passwordsalt".getBytes("UTF-8")
+  val keySpec  = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
+  val factory  = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
+  val bytes    = factory.generateSecret(keySpec).getEncoded
   val sKeySpec = new SecretKeySpec(bytes, "AES")
-  val eCipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+  val eCipher  = Cipher.getInstance("AES/CBC/PKCS5Padding")
   eCipher.init(Cipher.ENCRYPT_MODE, sKeySpec, iv)
-  val dCipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+  val dCipher  = Cipher.getInstance("AES/CBC/PKCS5Padding")
   dCipher.init(Cipher.DECRYPT_MODE, sKeySpec, iv)
 
   println(

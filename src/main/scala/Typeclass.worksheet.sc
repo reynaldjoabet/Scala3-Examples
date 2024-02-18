@@ -1,7 +1,7 @@
 trait Show[A] {
   def show(value: A): String
 }
-object Show {
+object Show   {
   implicit val intShow: Show[Int] = new Show[Int] {
     def show(value: Int): String = value.toString
   }
@@ -27,7 +27,7 @@ def printAndShow[A](
   println(printableInstance.print(value))
 }
 
-printAndShow(42) // Uses the implicit Show[Int] to convert to String
+printAndShow(42)              // Uses the implicit Show[Int] to convert to String
 printAndShow("Hello, Scala!") //// Uses the implicit Show[String] to get the value
 
 //Type class derivation involves automatically deriving type class instances for certain types. Libraries like Magnolia or Shapeless provide mechanisms for automatic derivation

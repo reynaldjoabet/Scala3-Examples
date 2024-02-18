@@ -651,6 +651,14 @@ given a function f: B => A, if you have a function g: C => B, you can use contra
 refined types are a way to define more specific types by adding constraints or refining existing types. These constraints are expressed as predicates that the values of the refined type must satisfy. Refined types are often used for creating more precise domain-specific types.
 
 The primary features in Scala that power refined types come from the combination of type-level programming features, literal types (introduced in Scala 2.13), and the ability to define and manipulate singleton types. 
+
+## Opaque types
+```scala
+object types {
+  opaque type Year = Int
+}
+```
+We’ve now created a new opaque type that is equivalent to an Int within the scope where it is defined. But outside the scope where it is defined, Year and Int are not the same
 [type class derivation](https://medium.com/riskified-technology/type-class-derivation-in-scala-3-ba3c7c41d3ef)
 [Scala3](http://www.limansky.me/posts/2021-07-26-from-scala-2-shapeless-to-scala-3.html)
 

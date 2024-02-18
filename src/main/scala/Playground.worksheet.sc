@@ -7,7 +7,7 @@ val t = (5, "String", 3d, false)
 t.toList
 
 val li = List(3, 4)
-val x = t.drop(2)
+val x  = t.drop(2)
 
 t ++ x
 (t ++ x).size
@@ -41,14 +41,14 @@ object TupleEncoders {
         .encodeRow(tuple.tail)
   }
 }
-object BaseEncoders {
-  given FieldEncoder[Int] with {
+object BaseEncoders  {
+  given FieldEncoder[Int] with     {
     def encodeField(x: Int) = x.toString
   }
   given FieldEncoder[Boolean] with {
     def encodeField(x: Boolean) = if x then "true" else "false"
   }
-  given FieldEncoder[String] with {
+  given FieldEncoder[String] with  {
     def encodeField(x: String) =
       x // Ideally, we should also escape commas and double quotes
   }
@@ -197,7 +197,7 @@ object Show {
         }
       }
     }
-  inline def elemLabels[T <: Tuple]: List[String] =
+  inline def elemLabels[T <: Tuple]: List[String]       =
     inline erasedValue[T] match {
       case _: EmptyTuple => Nil
       case _: (t *: ts)  => constValue[t].asInstanceOf[String] :: elemLabels[ts]
@@ -215,7 +215,7 @@ object Show {
     // in order to get the value that has that type, we use constValue
     val productName: String =
       constValue[m.MirroredLabel] // something like "Person"
-    val fieldNames = elemLabels[m.MirroredElemLabels]
+    val fieldNames               = elemLabels[m.MirroredElemLabels]
     val instances: List[Show[_]] =
       summonAll[m.MirroredElemTypes] // eg List(Show[Strin],Show[Int])
     val values =
@@ -233,7 +233,7 @@ object Show {
   inline def showCase[A, T <: Tuple](n: Int, ord: Int, a: A): String = {
     inline erasedValue[T] match {
       case _: EmptyTuple => ""
-      case _: (t *: ts) =>
+      case _: (t *: ts)  =>
         if (n == ord) {
           summonFrom { case p: Mirror.ProductOf[`t`] =>
             showProduct(p, a.asInstanceOf[t])
@@ -241,15 +241,15 @@ object Show {
         } else showCase[A, ts](n + 1, ord, a)
     }
   }
-  inline def showSum[A](m: Mirror.SumOf[A], a: A): String = {
+  inline def showSum[A](m: Mirror.SumOf[A], a: A): String            = {
     val ord = m.ordinal(a)
     showCase[A, m.MirroredElemTypes](0, ord, a)
   }
 
-  given Show[Int] = new Show[Int] {
+  given Show[Int]     = new Show[Int] {
     override def show(a: Int): String = a.toString()
   }
-  given Show[String] = new Show[String] {
+  given Show[String]  = new Show[String] {
     override def show(a: String): String = a
   }
   given Show[Boolean] = new Show[Boolean] {
@@ -317,7 +317,7 @@ object Show {
       def show(value: Map[A, B]): String = ""
     }
 
-  inline given derivedList[A](using elemShow: Show[A]): Show[List[A]] =
+  inline given derivedList[A](using elemShow: Show[A]): Show[List[A]]     =
     new Show[List[A]] {
       def show(value: List[A]): String =
         s"List(${value.map(elemShow.show).mkString(",")})"
@@ -401,7 +401,7 @@ summon[Mirror.SumOf[Day]].ordinal(Day.Saturday)
 summon[Mirror.SumOf[Day]].ordinal(Day.Sunday)
 
 summon[Show[Day]].show(Day.Friday)
-trait JsonEncoder[A] {
+trait JsonEncoder[A]  {
   def encode(value: A): String
 }
 
@@ -424,7 +424,7 @@ object JsonEncoder {
     new JsonEncoder[A] {
       def encode(a: A): String = {
         val fieldNames = elemLabels[m.MirroredElemLabels]
-        val values =
+        val values     =
           a.asInstanceOf[Product].productIterator.toList
 
         val fields = (fieldNames zip values).map { case (fieldName, value) =>

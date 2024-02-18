@@ -31,9 +31,9 @@ lazy val ops: List[HdfsOps[_]] = List(
   Write(
     ???,
     someBytes
-  ) // This `Write` needs to use the `OutS` just returned. But how???
+  )                // This `Write` needs to use the `OutS` just returned. But how???
   ,
-  Read(???, ???) // This `Read` needs to return a result.
+  Read(???, ???)   // This `Read` needs to return a result.
 )
 
 /*
@@ -97,22 +97,22 @@ final case class Wrap[F[_], A](fa: F[A]) extends FreeMonad[F, A]
 implicit def wrapInFreeMonad[F[_], A](fa: F[A]): FreeMonad[F, A] = Wrap(fa)
 
 // Check that we can write "HDFS programs" now.
-val hdfsProgram: FreeMonad[HdfsOps, Array[Byte]]= for {
-  _ <- Delete(???, ???)
-  out ← Create(???, ???)
-  _ <- Write(???, someBytes)
+val hdfsProgram: FreeMonad[HdfsOps, Array[Byte]] = for {
+  _         <- Delete(???, ???)
+  out        ← Create(???, ???)
+  _         <- Write(???, someBytes)
   readBytes <- Read(???, ???)
-  _ <- Delete(???, ???)
+  _         <- Delete(???, ???)
 } yield readBytes
 
 // Let's visualize the value of a shorter program:
-val x1: FreeMonad[HdfsOps, Unit] = for {
-  _ <- Delete(???, ???)
+val x1: FreeMonad[HdfsOps, Unit]        = for {
+  _   <- Delete(???, ???)
   out <- Create(???, ???)
-  _ <- Write(???, someBytes)
+  _   <- Write(???, someBytes)
 } yield ()
 // This is equivalent to:
-val x2: FreeMonad[HdfsOps, Unit] = Delete(???, ???).flatMap(_ =>
+val x2: FreeMonad[HdfsOps, Unit]        = Delete(???, ???).flatMap(_ =>
   Create(???, ???).flatMap(out => Write(???, someBytes))
 )
 // and is actually just a few nested case classes and some functions that return more nested case classes:
@@ -140,19 +140,19 @@ val x3: FlatMap[HdfsOps, Boolean, Unit] =
 // Suggestive syntax: F ~> M  is `for all X: F[X] ⇒ M[X]`.
 // same as foldMap
 
-trait Monad[F[_]] {
+trait Monad[F[_]]                                {
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
   def pure[A](a: A): F[A]
   def map[A, B](fa: F[A])(f: A => B): F[B] = this.flatMap(fa)(a => pure(f(a)))
 }
-object Monad {
+object Monad                                     {
   def apply[M[_]](implicit monad: Monad[M]): Monad[M] = monad
 }
 def interpret[F[_], M[_]: Monad, A, C](
     program: FreeMonad[F, A],
     interpreter: F ~> M
 ): M[A] = program match {
-  case Pure(a) => Monad[M].pure(a)
+  case Pure(a)                                                   => Monad[M].pure(a)
   case FlatMap(fa: FreeMonad[F, C], afb: (C => FreeMonad[F, A])) =>
     val mc: M[C] = interpret[F, M, C, C](fa, interpreter)
 
@@ -183,13 +183,13 @@ val expectedLog =
 val toTry: HdfsOps ~> Try = new (HdfsOps ~> Try) {
   override def apply[A](fa: HdfsOps[A]): Try[A] = (fa match {
 
-    case Delete(fs, path) =>Try(???)
+    case Delete(fs, path) => Try(???)
     case Create(fs, path) => Try(???)
     case Write(out, body) =>
       Try {
         ???
       }
-    case Read(fs, path) =>
+    case Read(fs, path)   =>
       Try {
         ???
       }
@@ -200,5 +200,3 @@ val toTry: HdfsOps ~> Try = new (HdfsOps ~> Try) {
 
 // Define an automatic conversion from F[A] to cats.Free[F, A]. The "wrapper" is called `liftF`.
 //implicit def wrapInFreeMonad[F[_], A](fa: F[A]): Free[F, A] = Free.liftF(fa)
-
-
