@@ -31,9 +31,9 @@ lazy val ops: List[HdfsOps[_]] = List(
   Write(
     ???,
     someBytes
-  )                // This `Write` needs to use the `OutS` just returned. But how???
+  ) // This `Write` needs to use the `OutS` just returned. But how???
   ,
-  Read(???, ???)   // This `Read` needs to return a result.
+  Read(???, ???) // This `Read` needs to return a result.
 )
 
 /*
@@ -78,17 +78,21 @@ object FreeMonad {
 }
 
 sealed trait FreeMonad[F[_], A] {
-  def flatMap[B](afb: A ⇒ FreeMonad[F, B]): FreeMonad[F, B] = FlatMap(this, afb)
+
+  def flatMap[B](afb: A => FreeMonad[F, B]): FreeMonad[F, B] = FlatMap(this, afb)
 
   // Also need to define `map`. Let's just define `map` via `flatMap` and `pure`.
-  def map[B](f: A => B): FreeMonad[F, B] = flatMap(f andThen FreeMonad.pure)
+  def map[B](f: A => B): FreeMonad[F, B] = flatMap(f.andThen(FreeMonad.pure))
+
 }
+
 // pure: A => M[A]
 final case class Pure[F[_], A](a: A) extends FreeMonad[F, A]
+
 // flatMap: (M[A] , A ⇒ M[B]) ⇒ M[B]
 final case class FlatMap[F[_], A, B](
-    fa: FreeMonad[F, A],
-    afb: A ⇒ FreeMonad[F, B]
+  fa: FreeMonad[F, A],
+  afb: A => FreeMonad[F, B]
 ) extends FreeMonad[F, B]
 
 final case class Wrap[F[_], A](fa: F[A]) extends FreeMonad[F, A]
@@ -99,22 +103,23 @@ implicit def wrapInFreeMonad[F[_], A](fa: F[A]): FreeMonad[F, A] = Wrap(fa)
 // Check that we can write "HDFS programs" now.
 val hdfsProgram: FreeMonad[HdfsOps, Array[Byte]] = for {
   _         <- Delete(???, ???)
-  out        ← Create(???, ???)
+  out        <- Create(???, ???)
   _         <- Write(???, someBytes)
   readBytes <- Read(???, ???)
   _         <- Delete(???, ???)
 } yield readBytes
 
 // Let's visualize the value of a shorter program:
-val x1: FreeMonad[HdfsOps, Unit]        = for {
+val x1: FreeMonad[HdfsOps, Unit] = for {
   _   <- Delete(???, ???)
   out <- Create(???, ???)
   _   <- Write(???, someBytes)
 } yield ()
+
 // This is equivalent to:
-val x2: FreeMonad[HdfsOps, Unit]        = Delete(???, ???).flatMap(_ =>
-  Create(???, ???).flatMap(out => Write(???, someBytes))
-)
+val x2: FreeMonad[HdfsOps, Unit] = Delete(???, ???)
+  .flatMap(_ => Create(???, ???).flatMap(out => Write(???, someBytes)))
+
 // and is actually just a few nested case classes and some functions that return more nested case classes:
 val x3: FlatMap[HdfsOps, Boolean, Unit] =
   FlatMap(
@@ -140,19 +145,23 @@ val x3: FlatMap[HdfsOps, Boolean, Unit] =
 // Suggestive syntax: F ~> M  is `for all X: F[X] ⇒ M[X]`.
 // same as foldMap
 
-trait Monad[F[_]]                                {
+trait Monad[F[_]] {
+
   def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
   def pure[A](a: A): F[A]
   def map[A, B](fa: F[A])(f: A => B): F[B] = this.flatMap(fa)(a => pure(f(a)))
+
 }
-object Monad                                     {
+
+object Monad {
   def apply[M[_]](implicit monad: Monad[M]): Monad[M] = monad
 }
+
 def interpret[F[_], M[_]: Monad, A, C](
-    program: FreeMonad[F, A],
-    interpreter: F ~> M
+  program: FreeMonad[F, A],
+  interpreter: F ~> M
 ): M[A] = program match {
-  case Pure(a)                                                   => Monad[M].pure(a)
+  case Pure(a) => Monad[M].pure(a)
   case FlatMap(fa: FreeMonad[F, C], afb: (C => FreeMonad[F, A])) =>
     val mc: M[C] = interpret[F, M, C, C](fa, interpreter)
 
@@ -160,6 +169,7 @@ def interpret[F[_], M[_]: Monad, A, C](
 
   case Wrap(fa) => interpreter(fa)
 }
+
 final case class Writer[A, B](b: String, c: Any) {}
 // We can choose the target monad at will. Consider two examples: `Writer` and `Try`.
 
@@ -173,14 +183,15 @@ val toWriter: ~>[HdfsOps, [X] =>> Writer[String, X]] =
 
 val expectedLog =
   """deleting target/tmp/test-hdfs-file.txt
-      |creating target/tmp/test-hdfs-file.txt
-      |writing test
-      |reading from target/tmp/test-hdfs-file.txt
-      |deleting target/tmp/test-hdfs-file.txt
-      |""".stripMargin
+    |creating target/tmp/test-hdfs-file.txt
+    |writing test
+    |reading from target/tmp/test-hdfs-file.txt
+    |deleting target/tmp/test-hdfs-file.txt
+    |""".stripMargin
 
 // Convert HdfsOps to `Try`, actually performing all operations and catching any exceptions.
 val toTry: HdfsOps ~> Try = new (HdfsOps ~> Try) {
+
   override def apply[A](fa: HdfsOps[A]): Try[A] = (fa match {
 
     case Delete(fs, path) => Try(???)
@@ -189,11 +200,12 @@ val toTry: HdfsOps ~> Try = new (HdfsOps ~> Try) {
       Try {
         ???
       }
-    case Read(fs, path)   =>
+    case Read(fs, path) =>
       Try {
         ???
       }
   }).map(_.asInstanceOf[A])
+
 }
 
 // The implementation of the free monad in `cats` is `cats.Free`. Let's implement the same thing using `cats.Free`.

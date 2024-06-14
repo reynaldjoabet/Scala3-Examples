@@ -20,17 +20,21 @@ f1(3)
 8.toDouble
 
 object types {
+
   opaque type Year = Int
   val year: Year = 1999
 
   object Year {
+
     def apply(value: Int): Year = value
 
     // to extract the value from an opaque type,add an extension method to the companion object of our opaque type
     extension (year: Year) {
       def value: Int = year
     }
+
   }
+
 }
 
 //Unlike built-in types, opaque types don’t have apply methods. Also, they don’t expose any methods of the original type

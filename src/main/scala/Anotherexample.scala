@@ -37,4 +37,5 @@ object Anotherexample extends App {
   println(h.getHostName())
   println(hosts2.head.getCanonicalHostName())
   println(h.getCanonicalHostName())
+
 }

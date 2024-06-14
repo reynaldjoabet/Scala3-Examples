@@ -1,6 +1,8 @@
 class Outer {
+
   class Inner
   def put(inner: Inner): Unit = ()
+
 }
 
 //we need an instance of Outer to create an Inner instance:
@@ -18,15 +20,17 @@ outer1.put(inner1) // works
 //The put method on outer1 will not accept just any arbitrary instance of Inner: It must receive one derived from its own instance
 
 case class Passenger(
-    firstName: String,
-    lastName: String,
-    middleInitial: Option[Char]
+  firstName: String,
+  lastName: String,
+  middleInitial: Option[Char]
 )
 
 class Airplane(flightNumber: Long) {
+
   case class Seat(row: Int, seat: Char)
 
   def seatPassenger(passenger: Passenger, seat: Seat): Unit = ()
+
 }
 //Given two separate Airplanes, it should be impossible to accidentally sit on the wrong plane!
 
@@ -55,35 +59,46 @@ flt102.seatPassenger(kelland, flt102Seat1A)  //good
 //Often, dependent method types are used in conjunction with abstract type members. Suppose we want to develop a hipsterrific key-value store. It will only support setting and getting the value for a key, but in a typesafe manner. Here is our oversimplified implementation:
 
 object AwesomeDB {
+
   abstract class Key(name: String) {
     type Value
   }
+
 }
 import AwesomeDB.Key
-class AwesomeDB  {
+
+class AwesomeDB {
+
   import collection.mutable.Map
-  val data                                  = Map.empty[Key, Any]
-  def get(key: Key): Option[key.Value]      =
+  val data = Map.empty[Key, Any]
+
+  def get(key: Key): Option[key.Value] =
     data.get(key).asInstanceOf[Option[key.Value]]
+
   def set(key: Key)(value: key.Value): Unit = data.update(key, value)
+
 }
 
 //We have defined a class Key with an abstract type member Value. The methods on AwesomeDB refer to that type without ever knowing or caring about the specific manifestation of this abstract type.
 
 //We can now define some concrete keys that we want to use:
 
-trait IntValued    extends Key {
+trait IntValued extends Key {
   type Value = Int
 }
+
 trait StringValued extends Key {
   type Value = String
 }
+
 object Keys {
+
   val foo = new Key("foo") with IntValued
   val bar = new Key("bar") with StringValued
+
 }
 
-val dataStore      = new AwesomeDB
+val dataStore = new AwesomeDB
 dataStore.set(Keys.foo)(23)
 val i: Option[Int] = dataStore.get(Keys.foo)
 //dataStore.set(Keys.foo)("23") // does not compile

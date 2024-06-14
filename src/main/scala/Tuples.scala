@@ -1,31 +1,35 @@
-import scala.deriving.Mirror
-
-import scala.compiletime._
-import scala.deriving.Mirror.Sum
-import scala.deriving.*
 import scala.collection.AbstractIterable
+import scala.compiletime._
+import scala.deriving.*
+import scala.deriving.Mirror
+import scala.deriving.Mirror.Sum
 
 object Others {
+
   // @main
   def mainApp =
     "".sayHi
-  val k       = 2 :: 3 :: Nil
+
+  val k = 2 :: 3 :: Nil
 
   val g = Nil.::(3)
   val f = List(3)
+
   extension (s: String) {
     def sayHi = println("thello dude")
   }
 
   object Tuples {
+
     def to[A <: Product](value: A)(using
-        mirror: Mirror.ProductOf[A]
+      mirror: Mirror.ProductOf[A]
     ): mirror.MirroredElemTypes = Tuple.fromProductTyped(value)
 
     def from[A](value: Product)(using
-        mirror: Mirror.ProductOf[A],
-        ev: value.type <:< mirror.MirroredElemTypes
+      mirror: Mirror.ProductOf[A],
+      ev: value.type <:< mirror.MirroredElemTypes
     ): A = mirror.fromProduct(value)
+
   }
 
   final case class Vehicle(manufacturer: String, wheels: Int)
@@ -43,40 +47,49 @@ object Others {
 
     import scala.deriving.Mirror
 
-    def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[?]]): Eq[T]         =
+    def eqSum[T](s: Mirror.SumOf[T], elems: => List[Eq[?]]): Eq[T] =
       new Eq[T] {
+
         def eqv(x: T, y: T): Boolean = {
           val ordx = s.ordinal(x) // (3)
           (s.ordinal(y) == ordx) && check(x, y, elems(ordx)) // (4)
         }
+
       }
-    def check(x: Any, y: Any, elem: Eq[?]): Boolean                        =
+
+    def check(x: Any, y: Any, elem: Eq[?]): Boolean =
       elem.asInstanceOf[Eq[Any]].eqv(x, y)
-    def iterable[T](p: T): Iterable[Any]                                   = new AbstractIterable[Any] {
+
+    def iterable[T](p: T): Iterable[Any] = new AbstractIterable[Any] {
       def iterator: Iterator[Any] = p.asInstanceOf[Product].productIterator
 
     }
+
     def eqProduct[T](p: Mirror.ProductOf[T], elems: => List[Eq[?]]): Eq[T] =
       new Eq[T] {
+
         def eqv(x: T, y: T): Boolean =
           iterable(x).lazyZip(iterable(y)).lazyZip(elems).forall(check)
+
       }
 
     inline def summonInstances[T, Elems <: Tuple]: List[Eq[?]] =
       inline erasedValue[Elems] match {
         case _: (elem *: elems) =>
           deriveOrSummon[T, elem] :: summonInstances[T, elems]
-        case _: EmptyTuple      => Nil
+        case _: EmptyTuple => Nil
       }
-    inline def deriveOrSummon[T, Elem]: Eq[Elem]               =
+
+    inline def deriveOrSummon[T, Elem]: Eq[Elem] =
       inline erasedValue[Elem] match {
         case _: T => deriveRec[T, Elem]
         case _    => summonInline[Eq[Elem]]
       }
-    inline def deriveRec[T, Elem]: Eq[Elem]                    =
+
+    inline def deriveRec[T, Elem]: Eq[Elem] =
       inline erasedValue[T] match {
         case _: Elem => error("infinite recursive derivation")
-        case _       =>
+        case _ =>
           Eq.derived[Elem](using
             summonInline[Mirror.Of[Elem]]
           ) // recursive derivation
@@ -89,12 +102,15 @@ object Others {
         case p: Mirror.ProductOf[T] => eqProduct(p, elemInstances)
       }
     }
+
   }
+
   def matchOnTuple(t: Tuple) = t match {
     case EmptyTuple   => None
     case head *: tail => Some(head)
 
   }
+
   (10, "x", true): (Int, String, Boolean)
   (10, "x", true): Int *: (String, Boolean)
   (10, "x", true): *:[Int, *:[String, *:[Boolean, EmptyTuple]]]
@@ -112,6 +128,7 @@ object Others {
   class IntOps(val i: Int) extends AnyVal {
     def square = i * i
   }
+
   implicit def intToIntOps(i: Int): IntOps = new IntOps(i)
 
   5.square

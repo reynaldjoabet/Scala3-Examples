@@ -8,16 +8,19 @@ case class WriteFile(path: String, content: String) extends FileOp[Unit]
 
 type FileProgram[A] = Free[FileOp, A]
 
-def readFile(path: String): FileProgram[String]                 = Free.liftF(ReadFile(path))
+def readFile(path: String): FileProgram[String] = Free.liftF(ReadFile(path))
+
 def writeFile(path: String, content: String): FileProgram[Unit] =
   Free.liftF(WriteFile(path, content))
 
 //val localInterpreter: FileOp ~> Id = ???
 val cloudInterpreter: FileOp ~> Future = new {
+
   override def apply[A](fa: FileOp[A]): Future[A] = fa match {
     case ReadFile(path)           => Future.successful(???)
     case WriteFile(path, content) => Future.successful(???)
   }
+
 }
 
 val program: FileProgram[String] = for {

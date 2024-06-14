@@ -1,11 +1,12 @@
-import scala.deriving._
 import scala.compiletime._
+import scala.deriving._
 
 trait JsonEncoder[A] {
   def encode(value: A): String
 }
 
 object JsonEncoder {
+
   given JsonEncoder[Int] with {
     def encode(value: Int): String = s"$value"
   }
@@ -13,6 +14,7 @@ object JsonEncoder {
   given JsonEncoder[String] with {
     def encode(value: String): String = s""""$value""""
   }
+
   inline def elemLabels[T <: Tuple]: List[String] =
     inline erasedValue[T] match {
       case _: EmptyTuple => Nil
@@ -22,21 +24,26 @@ object JsonEncoder {
   // Generic derivation using `erasedValue` for product types (case classes)
   inline given derived[A](using m: Mirror.Of[A]): JsonEncoder[A] =
     new JsonEncoder[A] {
+
       def encode(a: A): String = {
         val fieldNames = elemLabels[m.MirroredElemLabels]
-        val values     =
+        val values =
           a.asInstanceOf[Product].productIterator.toList
 
-        val fields = (fieldNames zip values).map { case (fieldName, value) =>
-          s""""${fieldName}": $value"""
-        }
+        val fields = fieldNames
+          .zip(values)
+          .map { case (fieldName, value) =>
+            s""""$fieldName": $value"""
+          }
         s"{${fields.mkString(", ")}}"
       }
 
     }
+
 }
 
 object MainApp {
+
 // Example case class
   case class Person(name: String, age: Int)
 
@@ -56,4 +63,5 @@ object MainApp {
   val personJsonEncoder = summon[JsonEncoder[Person]]
   printJson(Person("Alice", 30))
 // Output: {"name": "Alice", "age": 30}
+
 }

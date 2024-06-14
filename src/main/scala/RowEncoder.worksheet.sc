@@ -1,42 +1,54 @@
-import scala.NonEmptyTuple
-
-import scala.deriving.Mirror
 import scala.compiletime._
+import scala.deriving.Mirror
+import scala.NonEmptyTuple
 
 trait FieldEncoder[A] {
   def encodeField(a: A): String
 }
+
 type Row = List[String]
 
 trait RowEncoder[A] {
   def encodeRow(a: A): Row
 }
+
 object BaseEncoders {
-  given FieldEncoder[Int] with     {
+
+  given FieldEncoder[Int] with {
     def encodeField(x: Int) = x.toString
   }
+
   given FieldEncoder[Boolean] with {
     def encodeField(x: Boolean) = if x then "true" else "false"
   }
-  given FieldEncoder[String] with  {
+
+  given FieldEncoder[String] with {
+
     def encodeField(x: String) =
       x // Ideally, we should also escape commas and double quotes
+
   }
+
 }
 
 object TupleEncoders {
+
   // Base case
   given RowEncoder[EmptyTuple] with {
+
     def encodeRow(empty: EmptyTuple) =
       List.empty
+
   }
 
   // Inductive case
   given [H: FieldEncoder, T <: Tuple: RowEncoder]: RowEncoder[H *: T] with {
+
     def encodeRow(tuple: H *: T): Row =
-      summon[FieldEncoder[H]].encodeField(tuple.head) :: summon[RowEncoder[T]]
-        .encodeRow(tuple.tail)
+      summon[FieldEncoder[H]].encodeField(tuple.head) :: summon[RowEncoder[T]].encodeRow(tuple.tail)
+
   }
+
 }
 
 import BaseEncoders._

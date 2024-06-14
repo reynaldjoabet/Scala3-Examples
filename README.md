@@ -674,3 +674,8 @@ We’ve now created a new opaque type that is equivalent to an Int within the sc
 [automatic-type-class-derivation](https://medium.com/@mattroberts297/automatic-type-class-derivation-with-shapeless-part-three-357709122e8b)
 
 [shapeless-guide](https://books.underscore.io/shapeless-guide/shapeless-guide.html)
+
+
+Official jdk images
+[corretto](https://hub.docker.com/_/amazoncorretto)
+[temurin](https://hub.docker.com/_/eclipse-temurin)
