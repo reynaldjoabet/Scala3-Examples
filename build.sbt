@@ -16,7 +16,7 @@ version := "1.0"
 //in order to run the program in a different JVM, we add the following
 fork in run := true
 
-scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+//scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
@@ -27,3 +27,4 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 //   "17"
 // )
 ThisBuild / semanticdbEnabled := true
+ThisBuild / usePipelining := true
