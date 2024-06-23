@@ -1,7 +1,6 @@
 package domain
 
-
-enum AuthMethod(val value: String) derives CanEqual{
+enum AuthMethod(val value: String) derives CanEqual {
 
   case None extends AuthMethod("none")
   // OpenID Connect clientSecretBasic
@@ -16,4 +15,5 @@ enum AuthMethod(val value: String) derives CanEqual{
   case ClientSecretJwt extends AuthMethod("client_secret_jwt")
 
   case PrivateKeyJwt extends AuthMethod("private_key_jwt")
+
 }

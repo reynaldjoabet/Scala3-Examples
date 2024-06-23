@@ -103,7 +103,7 @@ implicit def wrapInFreeMonad[F[_], A](fa: F[A]): FreeMonad[F, A] = Wrap(fa)
 // Check that we can write "HDFS programs" now.
 val hdfsProgram: FreeMonad[HdfsOps, Array[Byte]] = for {
   _         <- Delete(???, ???)
-  out        <- Create(???, ???)
+  out       <- Create(???, ???)
   _         <- Write(???, someBytes)
   readBytes <- Read(???, ???)
   _         <- Delete(???, ???)
