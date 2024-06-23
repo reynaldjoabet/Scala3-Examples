@@ -149,18 +149,14 @@ case class PrintedBook(
   title: String,
   year: Int,
   pages: Int
-) extends Book
-    derives CanEqual,
-      Show
+) extends Book derives CanEqual, Show
 
 case class AudioBook(
   author: String,
   title: String,
   year: Int,
   lengthInMinutes: Int
-) extends Book
-    derives CanEqual,
-      Show
+) extends Book derives CanEqual, Show
 
 //Finally, use CanEqual to define which comparisons you want to allow:
 
@@ -297,8 +293,8 @@ object Show {
     new Show[Array[A]] {
 
       def show(value: Array[A]): String =
-        s"List(${value.map(elemShow.show).mkString(",")})"
-        // s"List(${})"
+      s"List(${value.map(elemShow.show).mkString(",")})"
+      // s"List(${})"
 
     }
 

@@ -27,4 +27,4 @@ fork in run := true
 //   "17"
 // )
 ThisBuild / semanticdbEnabled := true
-ThisBuild / usePipelining := true
+ThisBuild / usePipelining     := true
