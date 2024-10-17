@@ -53,7 +53,7 @@ object Show {
     val productName: String =
       constValue[m.MirroredLabel] // something like "Person"
     val fieldNames = elemLabels[m.MirroredElemLabels]
-    val instances: List[Show[_]] =
+    val instances: List[Show[?]] =
       summonAll[m.MirroredElemTypes] // eg List(Show[Strin],Show[Int])
     val values =
       a.asInstanceOf[Product].productIterator.toList // eg  List[Any] = List(1984, George Orwell, 1961, 328)
@@ -84,3 +84,5 @@ object Show {
   }
 
 }
+
+

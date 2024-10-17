@@ -42,9 +42,10 @@ object JsonEncoder {
 
 }
 
-object MainApp {
+object MainApp extends App {
 
-// Example case class
+  import JsonEncoder.*
+  // Example case class
   case class Person(name: String, age: Int)
 
 // A method that prints a JSON representation of a value

@@ -679,3 +679,62 @@ We’ve now created a new opaque type that is equivalent to an Int within the sc
 Official jdk images
 [corretto](https://hub.docker.com/_/amazoncorretto)
 [temurin](https://hub.docker.com/_/eclipse-temurin)
+
+
+Note that `UUID.randomUUID` is cryptographically strong, using `SecureRandom` under the hood. This also means that it shares the issues of SecureRandom — the small possibility that the thread underneath gets blocked when generating random UUIDs.This only happens under certain conditions, however, when we generate UUIDs, we generate a lot of them, in horizontally scaled nodes being started as Docker instances, so the likelihood of hitting this in production increases.
+
+```scala
+
+
+// Scala code
+import cats.effect.IO
+import java.util.UUID
+
+object UUIDUtils {
+  /**
+    * `UUID.randomUUID` is a risky operation, as it can block the current thread.
+    * This function redirects such calls to the thread-pool meant for blocking IO.
+    */
+  def generateRandomUUID: IO[UUID] =
+    IO.blocking(UUID.randomUUID())
+}
+```
+
+A method is a member of a scope (class, object ..) declared using `def`
+
+A `value` is an instance of a type. The type determines how we can use the value
+
+A function value is an instance of a function type, for example
+`val f:Int=>String = ...`  `f` is a function value because its type is the function type `Int=>String`
+
+The type `Int=>String` is a short hand for `scala.Function1[Int,String]`
+
+if `f` is a value, then f(q) expands to f.apply(1)
+
+A lambda is a convenient way to create an instance of a function type:
+`(x:Int)=>x+1` is equivalent to :
+new Function[Int,Int]{
+  def apply(x:Int):Int=x+1
+} 
+which itself expands to :
+`class anon() extends Function1[Int,Int]{
+  def apply(x:Int):Int=x+1
+}
+new anon()
+
+
+a reference to a method is not a value, but can be automatically converted into one:
+
+```scala
+def inc(x:Int)=x+1
+
+List(1,2,3).map(inc)
+
+```
+```scala
+val f :...= ...List(x)...
+
+```
+The type of f needs a polymorphic method apply as a member so we can call :
+
+`f[Int](1)==List(1)`

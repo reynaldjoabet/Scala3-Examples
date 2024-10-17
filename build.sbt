@@ -1,15 +1,29 @@
-scalaVersion := "3.3.1"
+scalaVersion := "3.3.3"
 
-lazy val root = (project in file("."))
-  .settings(
-    name := "Scala3-Examples"
-  )
-  .settings(
-    scalacOptions ++= Seq(
-      "-no-indent"
-    )
-  )
+lazy val root = (project in file(".")).settings(
+  name := "Scala3-Examples"
+)
 
+ThisBuild / scalacOptions ++= Seq(
+  "-encoding",
+  "UTF-8",
+  "-deprecation",
+  "-feature",
+  "-Xcheck-macros",
+  "-Ycheck:all", // also for checking macros
+  "-Ycheck-mods",
+  "-Ydebug-type-error",
+  "-Xprint-types", // Without this flag, we will not see error messages for exceptions during given-macro expansion!
+  "-Yshow-print-errors",
+  "-language:experimental.macros",
+  "-language:implicitConversions",
+  "-language:higherKinds",
+  "-language:namedTypeArguments",
+  "-language:dynamics",
+  "-Ykind-projector:underscores",
+  "-unchecked",
+  "-no-indent"
+)
 version := "1.0"
 
 // by default sbt run runs the program in the same JVM as sbt

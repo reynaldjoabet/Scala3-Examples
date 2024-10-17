@@ -1,94 +1,108 @@
-import scala.compiletime._
-import scala.deriving.Mirror
+// import scala.compiletime._
+// import scala.deriving.Mirror
 
-object TypeLambdas {
+// object TypeLambdas {
 
-  trait Monad[F[_]] {
+//   trait Monad[F[_]] {
 
-    def pure[A](a: A): F[A]
-    def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+//     def pure[A](a: A): F[A]
+//     def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
 
-  }
+//   }
 
-  type MyList = [X] =>> List[X] // type constructor
-  val b: MyList[Int] = List.apply[Int](8)
-  type myMap = [X] =>> Map[String, X]
+//   type MyList = [X] =>> List[X] // type constructor
+//   val b: MyList[Int] = List.apply[Int](8)
+//   type myMap = [X] =>> Map[String, X]
 
-  sealed abstract class Kleisli[F[_], -A, B]() {
-    def run: A => F[B]
-  }
+//   sealed abstract class Kleisli[F[_], -A, B]() {
+//     def run: A => F[B]
+//   }
 
-  class OptionT[F[_], A](opt: F[Option[A]])
+//   class OptionT[F[_], A](opt: F[Option[A]])
 
-  class KleisliMonad[F[_], C] extends Monad[[X] =>> Kleisli[F, X, C]] {
+//   class KleisliMonad[F[_], C] extends Monad[[X] =>> Kleisli[F, X, C]] {
 
-    override def flatMap[A, B](fa: Kleisli[F, A, C])(
-      f: A => Kleisli[F, B, C]
-    ): Kleisli[F, B, C] = ???
+//     override def flatMap[A, B](fa: Kleisli[F, A, C])(
+//       f: A => Kleisli[F, B, C]
+//     ): Kleisli[F, B, C] = ???
 
-    override def pure[A](a: A): Kleisli[F, A, C] = ???
+//     override def pure[A](a: A): Kleisli[F, A, C] = ???
 
-  }
+//   }
 
-  class Function1Monad[F] extends Monad[[X] =>> Function1[F, X]] {
+//   class Function1Monad[F] extends Monad[[X] =>> Function1[F, X]] {
 
-    override def flatMap[A, B](fa: F => A)(f: A => F => B): F => B = ???
-    override def pure[A](a: A): F => A                             = ???
+//     override def flatMap[A, B](fa: F => A)(f: A => F => B): F => B = ???
+//     override def pure[A](a: A): F => A                             = ???
 
-  }
+//   }
 
-  class MonadFunction2[X, Y] extends Monad[[C] =>> Function2[Int, Int, C]] {
+//   class MonadFunction2[X, Y] extends Monad[[C] =>> Function2[Int, Int, C]] {
 
-    override def flatMap[A, B](fa: (Int, Int) => A)(
-      f: A => (Int, Int) => B
-    ): (Int, Int) => B = ???
+//     override def flatMap[A, B](fa: (Int, Int) => A)(
+//       f: A => (Int, Int) => B
+//     ): (Int, Int) => B = ???
 
-    override def pure[A](a: A): (Int, Int) => A = ???
+//     override def pure[A](a: A): (Int, Int) => A = ???
 
-  }
+//   }
 
-  class OptionTMonad[F[_]] extends Monad[[X] =>> OptionT[F, X]] {
+//   class OptionTMonad[F[_]] extends Monad[[X] =>> OptionT[F, X]] {
 
-    override def flatMap[A, B](fa: OptionT[F, A])(
-      f: A => OptionT[F, B]
-    ): OptionT[F, B] = ???
+//     override def flatMap[A, B](fa: OptionT[F, A])(
+//       f: A => OptionT[F, B]
+//     ): OptionT[F, B] = ???
 
-    override def pure[A](a: A): OptionT[F, A] = ???
+//     override def pure[A](a: A): OptionT[F, A] = ???
 
-  }
+//   }
 
-  class EitherMonad[E] extends Monad[[X] =>> Either[E, X]] {
+//   class EitherMonad[E] extends Monad[[X] =>> Either[E, X]] {
 
-    override def flatMap[A, B](fa: Either[E, A])(
-      f: A => Either[E, B]
-    ): Either[E, B] = ???
+//     override def flatMap[A, B](fa: Either[E, A])(
+//       f: A => Either[E, B]
+//     ): Either[E, B] = ???
 
-    override def pure[A](a: A): Either[E, A] = ???
+//     override def pure[A](a: A): Either[E, A] = ???
 
-  }
+//   }
 
-  sealed trait HList extends Product with Serializable {
+//   sealed trait HList extends Product with Serializable {
 
-    def prepend[H](h: H): ::[H, HList] = new ::(h, this)
-    def ::[H](h: H): H :: HList        = new ::(h, this)
+//     def prepend[H](h: H): ::[H, HList] = new ::(h, this)
+//     def ::[H](h: H): H :: HList        = new ::(h, this)
 
-  }
+//   }
 
-  final case class ::[+H, +T <: HList](head: H, tail: T) extends HList {}
+//   final case class ::[+H, +T <: HList](head: H, tail: T) extends HList {}
 
-  sealed trait HNil extends HList {}
+//   sealed trait HNil extends HList {}
 
-  case object HNil extends HNil
+//   case object HNil extends HNil
 
-  val h = 5 :: HNil
+//   val h = 5 :: HNil
 
-  val p = HNil.prepend(6)
+//   val p = HNil.prepend(6)
 
-  case class Student[A](name: String, a: A)
-  val st: Student[Int] = Student("paul", 23)
+//   case class Student[A](name: String, a: A)
+//   val st: Student[Int] = Student("paul", 23)
 
-  transparent inline def sum(a: Int, b: Int) = a + b
-  val total: 30                              = sum(10, 20) // The type is Literal Value 30 instead of Int
+//   transparent inline def sum(a: Int, b: Int) = a + b
+//   val total: 30                              = sum(10, 20) // The type is Literal Value 30 instead of Int
 
-  // Shapeless makes it convenient to convert specific types into generic ones that we can manipulate with common code
+//   // Shapeless makes it convenient to convert specific types into generic ones that we can manipulate with common code
+// }
+
+object  Example{
+    def inc(x:Int)=x+1
+
+    List(1,2,3).map(inc)
+
+    val h:[X]=>X=>List[X]=[X]=>(x:X)=>List[X](x)
+    val h2: [X] => (x: X) => List[X]=[X]=>(x:X)=>List[X](x)
+    // h is a polymorphic function value with a polymorphic function type
+//inline def map[F[_]](f: [t] => t => F[t]): Map[this.type, F] 
+
+    val tuples=1*:"Hello"*:EmptyTuple
+    val mappedTuples=tuples.map(h)
 }

@@ -1,3 +1,8 @@
+import java.security.interfaces.EdECPublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+
+import scala.collection.mutable.ListBuffer
+
 class Outer {
 
   class Inner
@@ -106,3 +111,86 @@ val i: Option[Int] = dataStore.get(Keys.foo)
 ///In general, whenever you want to make sure that objects created or managed by a specific instance of another type cannot accidentally or purposely be interchanged or mixed, path-dependent types are the way to go.
 
 //Path-dependent types and dependent method types play a crucial role for attempts to encode information into types that is typically only known at runtime, for instance heterogenous lists, type-level representations of natural numbers and collections that carry their size in their type
+
+2 :: List.empty[Int]
+5 *: EmptyTuple
+List(7).splitAt(0)
+
+// val k: Int Map String = Map
+//   .empty[()]
+//HLists and case classes can both be used to define products of types. However HLists do not require the developer to declare class or field names. This makes them more convenient in some scenarios, for example in return types
+//Right-Associative: *:[Int, *:[Int, *:[Int, *:[Int, EmptyTuple]]]] is constructed from right to left, adding elements to the tuple type from the rightmost to the leftmost.
+  (1, 2, 3)
+  .size
+//*:  right-associative.
+
+//In Scala, any operator ending with : (a colon) is right associative
+
+//In simple words, right associative means evaluate expressions from right to left, and left associative means evaluate expressions from left to right
+
+//List.empty[Int] ::7// will not work
+//Here, we are getting a value :: is not a member of Int error owing to the right associative rule.
+
+//As per the right associative rule, the Scala compiler starts evaluation of this expression from the right, as follows:
+//7.::List.empty[Int]
+
+scala.collection.mutable.ListBuffer
+val li = ListBuffer(1)
+li.addOne(2)
+li.addOne(3)
+
+val l = List(2)
+
+l.prepended(1)
+
+//the Scala compiler is trying to call the Cons :: function on 7 (which is Int). If you go through the Int class in Scala API, we don't find the Cons function for this class. That's why we are getting the value :: is not a member of Int error.
+(3 *: 4 *: 5 *: EmptyTuple).head
+
+(3 *: 4 *: 5 *: EmptyTuple).tail
+
+3 *: 4 *: 5 *: 6 *: EmptyTuple
+
+(3 *: 4 *: 5 *: 6 *: EmptyTuple).tail
+
+(3 *: 4 *: 5 *: 6 *: EmptyTuple).head
+
+(1, 2, 3) ++ (4, 5, 6)
+
+(1, 2, 3).drop(2)
+
+(1, 2, 3).take(2)
+
+(1, 2, 3)(2)
+
+(1, 2, 3, 4, 5).splitAt(2)
+
+(1, 2, 3).zip(('a', 'b'))
+
+(1, 'a', 2).toList
+
+(1, 'a', 2).toArray
+
+(1, 'a', 2).toIArray
+
+(1, 'a').map[[X] =>> Option[X]]([T] => (t: T) => Some(t))
+
+//Trampolining: Use trampolining techniques or functional constructs (like cats.data.Eval or scalaz.Free) to defer recursive calls and manage stack depth effectively.
+
+enum OrderStatus {
+
+  case Ordered
+  case Processing
+  case InTransit
+  case Complete
+  case Cancelled
+
+}
+
+enum PermissionsWithBits(bits: Int) {
+
+  case READ  extends PermissionsWithBits(4) // binary 100
+  case WRITE extends PermissionsWithBits(2) // binary 010
+  case EXEC  extends PermissionsWithBits(1) // binary 001
+  case NONE  extends PermissionsWithBits(0)
+
+}

@@ -10,8 +10,7 @@ t.toList
 val li = List(3, 4)
 val x  = t.drop(2)
 
-t ++ x(t ++ x).size
-t.size(1, 2, 3).size
+t.size
 
 (3 *: "5" *: EmptyTuple).toList
 
@@ -365,13 +364,14 @@ object Show {
         s"Vector(${value.map(elemShow.show).mkString(",")})"
 
     }
-    inline given derivedListSet[A](using elemShow: Show[A]): Show[ListSet[A]] =
-      new Show[ListSet[A]] {
 
-        def show(value: ListSet[A]): String =
-          value.map(elemShow.show).mkString(",")
+  inline given derivedListSet[A](using elemShow: Show[A]): Show[ListSet[A]] =
+    new Show[ListSet[A]] {
 
-      }
+      def show(value: ListSet[A]): String =
+        value.map(elemShow.show).mkString(",")
+
+    }
 
   val n = valueOf[12]
 
@@ -384,7 +384,7 @@ val isb = ISB(45.7, "Java and Scala", true, p = p2)
 summon[Show[ISB]].show(isb)
 
 summon[Show[PrintedBook]].show(p1)
-summon[Show[AudioBook]].show(aBook)("hello", "dude").toList.mkString(",")
+//summon[Show[AudioBook]].show(aBook)("hello", "dude").toList.mkString(",")
 
 summon[Show[List[Int]]].show(List(2, 3, 44, 5, 4))
 

@@ -1,20 +1,23 @@
 object Main {
 
+  enum School {
+
+    case Graduate
+    case Undergraduate
+    case PostGraduate
+
+  }
+
   inline def classify(value: Any) = {
     inline value match {
       case int: Int    => "Int"
       case str: String => "String"
     }
-    enum School {
 
-      case Graduate
-      case Undergraduate
-      case PostGraduate
-
-    }
     def admission(school: School) = school match {
-      case School.Graduate      => ???
-      case School.Undergraduate => ???
+      case School.Graduate      => 2
+      case School.Undergraduate => 1
+      case School.PostGraduate  => 3
     }
   }
 
