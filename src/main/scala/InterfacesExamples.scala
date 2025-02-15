@@ -3,20 +3,20 @@ import java.net.NetworkInterface
 import scala.jdk._
 import scala.jdk.StreamConverters._
 
-import collection.convert.ImplicitConversions.`enumeration AsScalaIterator`
-
+//import collection.convert.ImplicitConversions.`enumeration AsScalaIterator`
+import scala.jdk.CollectionConverters.*
 object InterfacesExamples extends App {
 
   val interfaces = NetworkInterface.networkInterfaces().toScala(List)
 
-  val ips   = interfaces.flatMap(_.getInetAddresses())
+  val ips   = interfaces.flatMap(_.getInetAddresses().asScala)
   val names = interfaces.map(_.getDisplayName())
 
   val namesd = interfaces.map(_.getName())
 
   val mut = interfaces.map(_.getMTU())
 
-  val g = interfaces.flatMap(_.getSubInterfaces())
+  val g = interfaces.flatMap(_.getSubInterfaces().asScala)
 
   names.zip(mut).foreach(println)
 
@@ -39,7 +39,7 @@ object InterfacesExamples extends App {
     .map(_.mkString)
     .toScala(List)
 
-  val i = interface.getInetAddresses().map(_.getAddress().map(_.toString())).map(_.mkString).toList
+  val i = interface.getInetAddresses().asScala.map(_.getAddress().map(_.toString())).map(_.mkString).toList
   ip.foreach(println)
   i.foreach(println)
   println(ip.length)

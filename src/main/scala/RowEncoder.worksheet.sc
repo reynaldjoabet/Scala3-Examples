@@ -73,4 +73,5 @@ type Elem[X] = X match {
 
 val n: Elem[Int] = ""
 
+val m:Elem[Array[Int]]= 9
 type PolyIdentity = [T] => T => T

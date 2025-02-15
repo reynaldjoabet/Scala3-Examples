@@ -738,3 +738,35 @@ val f :...= ...List(x)...
 The type of f needs a polymorphic method apply as a member so we can call :
 
 `f[Int](1)==List(1)`
+
+
+### constValue
+constValue is used to retrieve a constant value of a given singleton type. Singleton types in Scala 3 allow you to represent literal values (such as 42, "hello", or true) as types
+
+### erasedValue
+erasedValue is used in inline functions to access the type of a type parameter without needing to carry an actual value for it. It enables compile-time logic without having to carry runtime values, which is useful when you need the type information but not the actual value of a variable.
+
+
+
+If you’re following the Smart Constructor pattern in Scala 2, you’ll discover that making the constructor of a case class private is not enough - the companion apply, and the copy methods of the case class will still be public. There are ways to work around it - but they are no longer needed with the `-Xsource:3` flag! Enabling it makes case classes behave correctly, like they do in Scala 3, disabling the companion apply and copy on any case class with a private constructor.
+
+[Case Classes w/ Smart Ctors](https://gist.github.com/tpolecat/a5cb0dc9adeacc93f846835ed21c92d2)
+
+- `as` instead of `=>` in import aliases
+`import java.util.{List => JList}` to `import java.util.List as JList`
+
+- `?` instead of `_` for wildcard types
+- vararg splice syntax (* instead of :_* and @_*)
+`foo(s: _*)` to `foo(s*)`
+`val Seq(a @_*) = ???` to `val Seq(a*) = ???`
+
+
+The `inline` can appear as:
+
+- `inline def`
+- `inline parameter`
+- `inline val`
+- `transparent inline def`
+- `inline if`
+- `inline match`
+

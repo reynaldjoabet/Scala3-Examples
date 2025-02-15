@@ -120,8 +120,7 @@ List(7).splitAt(0)
 //   .empty[()]
 //HLists and case classes can both be used to define products of types. However HLists do not require the developer to declare class or field names. This makes them more convenient in some scenarios, for example in return types
 //Right-Associative: *:[Int, *:[Int, *:[Int, *:[Int, EmptyTuple]]]] is constructed from right to left, adding elements to the tuple type from the rightmost to the leftmost.
-  (1, 2, 3)
-  .size
+(1, 2, 3).size
 //*:  right-associative.
 
 //In Scala, any operator ending with : (a colon) is right associative

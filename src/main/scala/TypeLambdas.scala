@@ -93,16 +93,18 @@
 //   // Shapeless makes it convenient to convert specific types into generic ones that we can manipulate with common code
 // }
 
-object  Example{
-    def inc(x:Int)=x+1
+object Example {
 
-    List(1,2,3).map(inc)
+  def inc(x: Int) = x + 1
 
-    val h:[X]=>X=>List[X]=[X]=>(x:X)=>List[X](x)
-    val h2: [X] => (x: X) => List[X]=[X]=>(x:X)=>List[X](x)
-    // h is a polymorphic function value with a polymorphic function type
-//inline def map[F[_]](f: [t] => t => F[t]): Map[this.type, F] 
+  List(1, 2, 3).map(inc)
 
-    val tuples=1*:"Hello"*:EmptyTuple
-    val mappedTuples=tuples.map(h)
+  val h: [X] => X => List[X]       = [X] => (x: X) => List[X](x)
+  val h2: [X] => (x: X) => List[X] = [X] => (x: X) => List[X](x)
+  // h is a polymorphic function value with a polymorphic function type
+//inline def map[F[_]](f: [t] => t => F[t]): Map[this.type, F]
+
+  val tuples       = 1 *: "Hello" *: EmptyTuple
+  val mappedTuples = tuples.map(h)
+
 }

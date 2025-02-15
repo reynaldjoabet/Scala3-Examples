@@ -23,3 +23,8 @@ val html = s""" hello dude
               | how are you doing $name
               |Hope great!
 """.stripMargin
+
+
+val examle:"I'm a literal type"="I'm a literal type"
+
+val value=summon[ValueOf["I'm a literal type"]].value

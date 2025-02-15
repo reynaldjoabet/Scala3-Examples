@@ -234,8 +234,7 @@ object Show {
     val productName: String =
       constValue[m.MirroredLabel] // something like "Person"
     val fieldNames = elemLabels[m.MirroredElemLabels]
-    val instances: List[Show[_]] =
-      summonAll[m.MirroredElemTypes] // eg List(Show[String],Show[Int])
+    val instances: List[Show[?]] = summonAll[m.MirroredElemTypes] // eg List(Show[String],Show[Int])
     val values =
       a.asInstanceOf[Product].productIterator.toList // eg  List[Any] = List(1984, George Orwell, 1961, 328)
 
@@ -292,7 +291,7 @@ object Show {
     new Show[Array[A]] {
 
       def show(value: Array[A]): String =
-      s"List(${value.map(elemShow.show).mkString(",")})"
+        s"List(${value.map(elemShow.show).mkString(",")})"
       // s"List(${})"
 
     }
@@ -426,6 +425,8 @@ new Mirror.Product {
 summon[Mirror.SumOf[SiteMember]].ordinal(SiteMember.AnonymousUser(""))
 
 constValue["hl"]
+
+constValue["element"]
 List(7).::(8).appended(0).prepended(45)
 
 object A { val x = 42 }

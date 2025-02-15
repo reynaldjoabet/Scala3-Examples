@@ -135,7 +135,8 @@ object Others {
 //The 5 gets implicitly converted to IntOps, which provides the square method.
 
 //implicit class IntOps2(val i: Int) extends AnyVal {  def square: Int = i * i}
-  constValue[9]
+  val value = constValue[9]
+  
+  println(value)
 
 }
-

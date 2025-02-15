@@ -29,9 +29,13 @@ eCipher.init(Cipher.ENCRYPT_MODE, sKeySpec, iv)
 val dCipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
 dCipher.init(Cipher.DECRYPT_MODE, sKeySpec, iv)
 
-
 new java.security.SecureRandom().getAlgorithm()
 
 SecureRandom.getInstance("NativePRNGNonBlocking").getAlgorithm()
 
+SecureRandom.getInstance("NativePRNGNonBlocking").nextFloat()
+
+Cipher.getInstance("AES/CBC/PKCS5Padding")
+
+SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
 

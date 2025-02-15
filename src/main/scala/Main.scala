@@ -21,7 +21,7 @@ object Main {
     }
   }
 
-  @main def run = classify(2)
+  @main def run = Main.classify(2)
 
   inline def hello: Unit =
     inline if (debugLogEnabled) {

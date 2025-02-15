@@ -34,3 +34,15 @@ printAndShow(42)              // Uses the implicit Show[Int] to convert to Strin
 printAndShow("Hello, Scala!") //// Uses the implicit Show[String] to get the value
 
 //Type class derivation involves automatically deriving type class instances for certain types. Libraries like Magnolia or Shapeless provide mechanisms for automatic derivation
+
+
+import scala.compiletime.* 
+
+opaque type  NonEmptyMyString=String
+
+object NonEmptyMyString{
+  inline def apply(s:String):NonEmptyMyString={
+    requireConst(s)
+    inline if s.isEmpty then "error" else s
+  }
+}
